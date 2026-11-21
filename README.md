@@ -50,7 +50,7 @@ The trigger checks for new faxes on the schedule you choose (polling). On its fi
 
 ## Compatibility
 
-Tested with n8n 1.x and 2.x. Needs a FaxToFax monthly plan for API keys.
+Built with the official n8n node CLI. Needs a FaxToFax monthly plan for API keys.
 
 ## Resources
 
