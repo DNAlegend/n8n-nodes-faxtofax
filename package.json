@@ -1,17 +1,34 @@
 {
-  "name": "n8n-nodes-faxtofax",
-  "version": "0.1.0",
-  "description": "Send and receive faxes in n8n with FaxToFax",
-  "keywords": ["n8n-community-node-package", "fax", "faxtofax", "efax", "send fax"],
-  "license": "MIT",
-  "homepage": "https://faxtofax.com/integrations/mcp",
-  "author": { "name": "FaxToFax" },
-  "repository": { "type": "git", "url": "git+https://github.com/DNAlegend/n8n-nodes-faxtofax.git" },
-  "files": ["credentials", "nodes", "README.md"],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": ["credentials/FaxToFaxApi.credentials.js"],
-    "nodes": ["nodes/FaxToFax/FaxToFax.node.js", "nodes/FaxToFax/FaxToFaxTrigger.node.js"]
-  },
-  "peerDependencies": { "n8n-workflow": "*" }
+	"name": "n8n-nodes-faxtofax",
+	"version": "0.2.0",
+	"description": "Send and receive faxes in n8n with FaxToFax",
+	"license": "MIT",
+	"homepage": "https://github.com/DNAlegend/n8n-nodes-faxtofax",
+	"keywords": ["n8n-community-node-package", "fax", "faxtofax", "send fax", "efax"],
+	"author": { "name": "faxtofax", "email": "abuaisha.hussin@gmail.com" },
+	"repository": { "type": "git", "url": "git+https://github.com/DNAlegend/n8n-nodes-faxtofax.git" },
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": ["dist"],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": ["dist/credentials/FaxToFaxApi.credentials.js"],
+		"nodes": ["dist/nodes/FaxToFax/FaxToFax.node.js", "dist/nodes/FaxToFaxTrigger/FaxToFaxTrigger.node.js"]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "*",
+		"eslint": "9.39.4",
+		"prettier": "3.8.3",
+		"release-it": "20.2.0",
+		"typescript": "5.9.3"
+	},
+	"peerDependencies": { "n8n-workflow": "*" }
 }
