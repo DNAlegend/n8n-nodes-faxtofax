@@ -55,7 +55,7 @@ Built with the official n8n node CLI. Needs a FaxToFax monthly plan for API keys
 ## Resources
 
 - [FaxToFax](https://faxtofax.com)
-- [FaxToFax API and AI agents](https://faxtofax.com/integrations/mcp)
+- [FaxToFax REST API](https://faxtofax.com/integrations/mcp#rest-api)
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 
 ## License

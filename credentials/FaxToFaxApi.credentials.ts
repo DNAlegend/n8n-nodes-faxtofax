@@ -39,24 +39,8 @@ export class FaxToFaxApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://faxtofax.com',
-			url: '/api/mcp',
-			method: 'POST',
-			body: {
-				jsonrpc: '2.0',
-				id: 1,
-				method: 'tools/call',
-				params: { name: 'list_numbers', arguments: {} },
-			},
+			url: '/api/v1/me',
+			method: 'GET',
 		},
-		rules: [
-			{
-				type: 'responseSuccessBody',
-				properties: {
-					key: 'result.isError',
-					value: true,
-					message: 'This API key cannot read fax numbers',
-				},
-			},
-		],
 	};
 }

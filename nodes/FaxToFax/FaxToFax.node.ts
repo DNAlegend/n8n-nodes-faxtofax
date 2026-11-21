@@ -6,7 +6,7 @@ import type {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
-import { callTool, clean } from './transport';
+import { apiRequest, clean, downloadPdf } from './transport';
 
 export class FaxToFax implements INodeType {
 	description: INodeTypeDescription = {
@@ -198,11 +198,12 @@ export class FaxToFax implements INodeType {
 						const name = decodeURIComponent(
 							new URL(url).pathname.split('/').pop() || 'document.pdf',
 						);
-						args.document_file = { download_url: url, file_id: 'n8n', file_name: name };
+						args.document_url = url;
+						args.document_filename = name;
 					}
 					if (
 						!args.document_base64 &&
-						!args.document_file &&
+						!args.document_url &&
 						!args.document_text &&
 						!args.cover_note
 					) {
@@ -210,16 +211,23 @@ export class FaxToFax implements INodeType {
 							itemIndex: i,
 						});
 					}
-					out.push({ json: await callTool(this, 'send_fax', args), pairedItem: { item: i } });
-				} else if (op === 'get') {
-					const json = await callTool(this, 'get_fax_status', {
-						fax_id: this.getNodeParameter('faxId', i) as string,
+					out.push({
+						json: await apiRequest(this, 'POST', '/faxes', args),
+						pairedItem: { item: i },
 					});
+				} else if (op === 'get') {
+					const json = await apiRequest(
+						this,
+						'GET',
+						`/faxes/${encodeURIComponent(this.getNodeParameter('faxId', i) as string)}`,
+					);
 					out.push({ json, pairedItem: { item: i } });
 				} else if (op === 'list') {
-					const res = await callTool(
+					const res = await apiRequest(
 						this,
-						'list_faxes',
+						'GET',
+						'/faxes',
+						undefined,
 						clean({
 							direction: this.getNodeParameter('direction', i) as string,
 							query: this.getNodeParameter('query', i) as string,
@@ -230,9 +238,9 @@ export class FaxToFax implements INodeType {
 						out.push({ json: f, pairedItem: { item: i } });
 				} else if (op === 'download') {
 					const id = this.getNodeParameter('faxId', i) as string;
-					const r = await callTool(this, 'get_fax_document', { fax_id: id });
+					const pdf = await downloadPdf(this, id);
 					const data = await this.helpers.prepareBinaryData(
-						Buffer.from(r.blob as string, 'base64'),
+						pdf,
 						`fax-${id}.pdf`,
 						'application/pdf',
 					);

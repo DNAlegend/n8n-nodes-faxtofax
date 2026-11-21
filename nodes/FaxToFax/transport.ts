@@ -1,6 +1,7 @@
 import type {
 	IDataObject,
 	IExecuteFunctions,
+	IHttpRequestMethods,
 	IHttpRequestOptions,
 	IPollFunctions,
 	JsonObject,
@@ -9,42 +10,57 @@ import { NodeApiError } from 'n8n-workflow';
 
 type Ctx = IExecuteFunctions | IPollFunctions;
 
-// FaxToFax's API is JSON-RPC over HTTPS (its MCP endpoint), authenticated with an API key.
-export async function callTool(
+export const BASE_URL = 'https://faxtofax.com/api/v1';
+
+// FaxToFax REST API v1 (see README), authenticated with an API key.
+// FaxToFax answers errors as { "error": "<a plain-English sentence>" }: show that sentence, not a generic HTTP message.
+function apiError(ctx: Ctx, error: unknown): NodeApiError {
+	const e = error as { response?: { body?: unknown; data?: unknown } };
+	let body = e.response?.body ?? e.response?.data;
+	if (typeof body === 'string') {
+		try {
+			body = JSON.parse(body);
+		} catch {
+			body = undefined;
+		}
+	}
+	const message = (body as IDataObject | undefined)?.error as string | undefined;
+	return new NodeApiError(ctx.getNode(), error as JsonObject, message ? { message } : undefined);
+}
+
+export async function apiRequest(
 	ctx: Ctx,
-	name: string,
-	args: IDataObject = {},
+	method: IHttpRequestMethods,
+	path: string,
+	body?: IDataObject,
+	qs?: IDataObject,
 ): Promise<IDataObject> {
-	const options: IHttpRequestOptions = {
-		method: 'POST',
-		url: 'https://faxtofax.com/api/mcp',
-		json: true,
-		body: { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } },
-	};
-	const res = (await ctx.helpers.httpRequestWithAuthentication.call(
-		ctx,
-		'faxToFaxApi',
-		options,
-	)) as IDataObject;
-	if (res.error) {
-		throw new NodeApiError(ctx.getNode(), res.error as JsonObject);
+	const options: IHttpRequestOptions = { method, url: `${BASE_URL}${path}`, json: true };
+	if (body) options.body = body;
+	if (qs) options.qs = qs;
+	try {
+		return (await ctx.helpers.httpRequestWithAuthentication.call(
+			ctx,
+			'faxToFaxApi',
+			options,
+		)) as IDataObject;
+	} catch (error) {
+		throw apiError(ctx, error);
 	}
-	const result = (res.result ?? {}) as IDataObject;
-	const content = (result.content ?? []) as IDataObject[];
-	const text = content.find((c) => c.type === 'text')?.text as string | undefined;
-	if (result.isError) {
-		throw new NodeApiError(
-			ctx.getNode(),
-			{ message: text ?? 'FaxToFax returned an error' } as JsonObject,
-			{
-				message: text ?? 'FaxToFax returned an error',
-			},
-		);
+}
+
+export async function downloadPdf(ctx: IExecuteFunctions, id: string): Promise<Buffer> {
+	try {
+		const res = (await ctx.helpers.httpRequestWithAuthentication.call(ctx, 'faxToFaxApi', {
+			method: 'GET',
+			url: `${BASE_URL}/faxes/${encodeURIComponent(id)}/document`,
+			encoding: 'arraybuffer',
+			json: false,
+		})) as ArrayBuffer;
+		return Buffer.from(res);
+	} catch (error) {
+		throw apiError(ctx, error);
 	}
-	if (result.structuredContent) return result.structuredContent as IDataObject;
-	const resource = content.find((c) => c.type === 'resource')?.resource as IDataObject | undefined;
-	if (resource) return resource;
-	return text ? (JSON.parse(text) as IDataObject) : {};
 }
 
 export function clean(o: IDataObject): IDataObject {

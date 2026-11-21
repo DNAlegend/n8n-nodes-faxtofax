@@ -6,7 +6,7 @@ import type {
 	IPollFunctions,
 } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
-import { callTool } from '../FaxToFax/transport';
+import { apiRequest } from '../FaxToFax/transport';
 
 export class FaxToFaxTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -40,7 +40,7 @@ export class FaxToFaxTrigger implements INodeType {
 		const event = this.getNodeParameter('event') as string;
 		const state = this.getWorkflowStaticData('node');
 		const manual = this.getMode() === 'manual';
-		const res = await callTool(this, 'list_faxes', {
+		const res = await apiRequest(this, 'GET', '/faxes', undefined, {
 			direction: event === 'received' ? 'inbound' : 'outbound',
 			limit: manual ? 1 : 100,
 		});

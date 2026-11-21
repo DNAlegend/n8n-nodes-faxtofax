@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-faxtofax",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Send and receive faxes in n8n with FaxToFax",
 	"license": "MIT",
 	"homepage": "https://github.com/DNAlegend/n8n-nodes-faxtofax",
