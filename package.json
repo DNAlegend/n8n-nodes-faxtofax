@@ -1,0 +1,17 @@
+{
+  "name": "n8n-nodes-faxtofax",
+  "version": "0.1.0",
+  "description": "Send and receive faxes in n8n with FaxToFax",
+  "keywords": ["n8n-community-node-package", "fax", "faxtofax", "efax", "send fax"],
+  "license": "MIT",
+  "homepage": "https://faxtofax.com/integrations/mcp",
+  "author": { "name": "FaxToFax" },
+  "repository": { "type": "git", "url": "git+https://github.com/DNAlegend/n8n-nodes-faxtofax.git" },
+  "files": ["credentials", "nodes", "README.md"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": ["credentials/FaxToFaxApi.credentials.js"],
+    "nodes": ["nodes/FaxToFax/FaxToFax.node.js", "nodes/FaxToFax/FaxToFaxTrigger.node.js"]
+  },
+  "peerDependencies": { "n8n-workflow": "*" }
+}
